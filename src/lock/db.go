@@ -17,13 +17,13 @@ type Database interface {
 	EndSession(ctx context.Context, sessionID int64) glitch.DataError
 	BumpSession(ctx context.Context, sessionID int64) glitch.DataError
 	GetWork(ctx context.Context, sessionID int64, scanTask ScanTask) ([]Task, glitch.DataError)
-	FinishTasks(ctx context.Context, taskIDs []int64) glitch.DataError
+	FinishTasks(ctx context.Context, taskIDs []string) glitch.DataError
 }
 
 // Task is an interface that can GetID - This is meant to be implemented as a struct that holds all task info that
 // The Tasker needs to do the work associated with the task.
 type Task interface {
-	GetID() int64
+	GetID() string
 }
 
 // DBFinder will return an Database implementation

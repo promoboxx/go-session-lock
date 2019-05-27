@@ -156,7 +156,7 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 		return fmt.Errorf("Error running tasks: %v", err)
 	}
 
-	taskIDs := make([]int64, len(completedTasks))
+	taskIDs := make([]string, len(completedTasks))
 	for i, t := range completedTasks {
 		taskIDs[i] = t.GetID()
 	}
