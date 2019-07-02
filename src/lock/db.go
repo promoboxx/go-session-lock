@@ -6,6 +6,8 @@ import (
 	"github.com/promoboxx/go-glitch/glitch"
 )
 
+//go:generate mockgen -destination=./mocks/db-mock.go -package=lockmock github.com/promoboxx/go-session-lock/src/lock Database,Task,Scanner
+
 // SQL errors
 const (
 	SQLErrorSessionNotFound = "SL001"
