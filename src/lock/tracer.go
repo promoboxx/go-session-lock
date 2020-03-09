@@ -12,7 +12,6 @@ type Tracer interface {
 // Span can hold an error and be finalized.  This is meant to play nice with open tracing
 type Span interface {
 	Finish()
-	SetError(err error)
 }
 
 // newNoopTracer exposes a noop tracer that does nothing but fulfill the Tracer interface
@@ -28,5 +27,3 @@ func (noopTracer) StartSpanWithContext(ctx context.Context, name string) (Span, 
 }
 
 func (noopSpan) Finish() {}
-
-func (noopSpan) SetError(err error) {}

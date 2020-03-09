@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
+
+	"github.com/promoboxx/go-metric-client/metrics"
 )
 
 // Tasker can do the work associated with the tasks passed to it.
@@ -16,11 +19,12 @@ type Runner struct {
 	stop      chan bool
 	sessionID int64
 	dbFinder  DBFinder
-	tracer    Tracer
+	client    metrics.Client
 	scanTask  ScanTask
 	loopTick  time.Duration
 	logger    Logger
 	tasker    Tasker
+	name      string
 }
 
 // NewRunner will create a new Runner to handle a type of task
@@ -28,22 +32,23 @@ type Runner struct {
 // scanTask can read from a sql.row into a Task
 // tasker can complete Tasks
 // looptick defines how often to check for tasks to complete
-// tracer is optional and will log tracing metrics in an open tracing friendly way if provided
+// client is a go-metrics-client that will also start spans for us
 // logger is optional and will log errors if provided
-func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, tracer Tracer, logger Logger) *Runner {
-	if tracer == nil {
-		tracer = newNoopTracer()
+func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, client metrics.Client, logger Logger, name string) *Runner {
+	if client == nil {
+		return nil
 	}
 	if logger == nil {
 		logger = &noopLogger{}
 	}
 	return &Runner{
 		dbFinder: dbFinder,
-		tracer:   tracer,
+		client:   client,
 		scanTask: scanTask,
 		loopTick: loopTick,
 		logger:   logger,
 		tasker:   tasker,
+		name:     name,
 	}
 }
 
@@ -89,10 +94,10 @@ func (r *Runner) Run() error {
 }
 
 func (r *Runner) startSession(ctx context.Context, db Database) (sessionID int64, err error) {
-	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "runner start session")
+	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner start session")
 	defer func() {
 		if err != nil {
-			span.SetError(err)
+			span.SetTag("error", err)
 		}
 		span.Finish()
 	}()
@@ -102,10 +107,10 @@ func (r *Runner) startSession(ctx context.Context, db Database) (sessionID int64
 }
 
 func (r *Runner) endSession(ctx context.Context) (err error) {
-	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "runner end session")
+	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner end session")
 	defer func() {
 		if err != nil {
-			span.SetError(err)
+			span.SetTag("error", err)
 		}
 		span.Finish()
 	}()
@@ -123,10 +128,15 @@ func (r *Runner) endSession(ctx context.Context) (err error) {
 }
 
 func (r *Runner) doWork(ctx context.Context) (err error) {
-	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "doing work")
+	span, spanCtx := r.client.StartSpanWithContext(ctx, "doing work")
+	start := time.Now()
+	name := r.name
+	sessionID := strconv.FormatInt(r.sessionID, 10)
+	params := make(map[string]string)
+	r.client.BackgroundRate(sessionID, name, params, 1)
 	defer func() {
 		if err != nil {
-			span.SetError(err)
+			span.SetTag("error", err)
 		}
 		span.Finish()
 	}()
@@ -134,6 +144,7 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 	// get work and process
 	db, err := r.dbFinder()
 	if err != nil {
+		r.handleError(start, sessionID, name, "Failed to find DB", err.Error(), params)
 		return fmt.Errorf("Error finding DB: %v", err)
 	}
 	tasks, dbErr := db.GetWork(spanCtx, r.sessionID, r.scanTask)
@@ -143,9 +154,11 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 			r.logger.Printf("Session expired. Getting new one")
 			r.sessionID, err = db.StartSession(spanCtx)
 			if err != nil {
+				r.handleError(start, sessionID, name, "Failed to start session", err.Error()+" with dbError: "+dbErr.Error(), params)
 				return fmt.Errorf("Error starting new session: %v", dbErr)
 			}
 		default:
+			r.handleError(start, sessionID, name, "Failed getting work from db", err.Error()+" with dbError: "+dbErr.Error(), params)
 			return fmt.Errorf("Error getting work from db: %v", dbErr)
 		}
 
@@ -153,6 +166,7 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 
 	completedTasks, err := r.tasker(spanCtx, tasks)
 	if err != nil {
+		r.handleError(start, sessionID, name, "Error running tasks", err.Error(), params)
 		return fmt.Errorf("Error running tasks: %v", err)
 	}
 
@@ -163,10 +177,19 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 
 	dbErr = db.FinishTasks(spanCtx, taskIDs)
 	if dbErr != nil {
+		r.handleError(start, sessionID, name, "Error finishing tasks", dbErr.Error(), params)
 		return fmt.Errorf("Error finishing tasks: %v", dbErr)
 	}
-
+	end := time.Since(start)
+	r.client.BackgroundDuration(sessionID, name, params, end)
 	return nil
+}
+
+// Does common error stuff
+func (r *Runner) handleError(start time.Time, sessionID, name, code, message string, params map[string]string) {
+	end := time.Since(start)
+	r.client.BackgroundDuration(sessionID, name, params, end)
+	r.client.BackgroundError(sessionID, name, params, code, message, 1)
 }
 
 // Stop stops the runner from looping
