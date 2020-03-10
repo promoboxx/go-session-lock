@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type Tasker func(ctx context.Context, tasks []Task) ([]Task, error)
 // Runner will loop and run tasks assigned to it
 type Runner struct {
 	stop      chan bool
+	stopGroup *sync.WaitGroup
 	sessionID int64
 	dbFinder  DBFinder
 	tracer    Tracer
@@ -70,18 +72,40 @@ func (r *Runner) Run() error {
 		tick := time.Tick(r.loopTick)
 		for {
 			select {
-			case <-tick:
-				err = r.doWork(ctx)
-				if err != nil {
-					r.logger.Printf("Error doing work: %v", err)
-				}
-
 			case <-r.stop: // if Stop() was called, exit
-				err = r.endSession(ctx)
+				err := r.endSession(ctx)
 				if err != nil {
 					r.logger.Printf("Error ending session: %v", err)
 				}
 				return
+			default:
+				// noop
+			}
+			select {
+			case <-tick:
+				// use wait group to block while doing work.
+				r.stopGroup.Add(1)
+				err := r.doWork(ctx)
+				if err != nil {
+					r.logger.Printf("Error doing work: %v", err)
+				}
+				r.stopGroup.Done()
+			}
+		}
+	}()
+	go func() {
+		// setup a ticker bump the session every 30 seconds
+		// This will keep the session active even when working on tasks for a long time.
+		// When the service shuts down bump will stop being called, sessions will eventually expire,
+		// and other services will pick up new work.
+		tick := time.Tick(time.Second * 30)
+		for {
+			select {
+			case <-tick:
+				err := db.BumpSession(ctx, r.sessionID)
+				if err != nil {
+					r.logger.Printf("Error bumping session: %v", err)
+				}
 			}
 		}
 	}()
@@ -170,6 +194,8 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 }
 
 // Stop stops the runner from looping
-func (r *Runner) Stop() {
+// Stop returns a WaitGroup which you can wait on to ensure all work is finished
+func (r *Runner) Stop() *sync.WaitGroup {
 	close(r.stop)
+	return r.stopGroup
 }
