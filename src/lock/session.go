@@ -14,15 +14,16 @@ type Tasker func(ctx context.Context, tasks []Task) ([]Task, error)
 
 // Runner will loop and run tasks assigned to it
 type Runner struct {
-	stop      chan bool
-	stopGroup *sync.WaitGroup
-	sessionID int64
-	dbFinder  DBFinder
-	tracer    Tracer
-	scanTask  ScanTask
-	loopTick  time.Duration
-	logger    Logger
-	tasker    Tasker
+	stop         chan bool
+	stopGroup    *sync.WaitGroup
+	sessionMutex sync.RWMutex
+	sessionID    int64
+	dbFinder     DBFinder
+	tracer       Tracer
+	scanTask     ScanTask
+	loopTick     time.Duration
+	logger       Logger
+	tasker       Tasker
 }
 
 // NewRunner will create a new Runner to handle a type of task
@@ -50,6 +51,7 @@ func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick tim
 }
 
 // Run will start looping and processing tasks
+// dont call this more than once.
 func (r *Runner) Run() error {
 	db, err := r.dbFinder()
 	if err != nil {
@@ -58,7 +60,9 @@ func (r *Runner) Run() error {
 
 	ctx := context.Background()
 
+	r.sessionMutex.Lock()
 	r.sessionID, err = r.startSession(ctx, db)
+	r.sessionMutex.Unlock()
 	if err != nil {
 		return err
 	}
@@ -102,7 +106,9 @@ func (r *Runner) Run() error {
 		for {
 			select {
 			case <-tick:
+				r.sessionMutex.RLock()
 				err := db.BumpSession(ctx, r.sessionID)
+				r.sessionMutex.RUnlock()
 				if err != nil {
 					r.logger.Printf("Error bumping session: %v", err)
 				}
@@ -139,7 +145,9 @@ func (r *Runner) endSession(ctx context.Context) (err error) {
 		return err
 	}
 
+	r.sessionMutex.Lock()
 	err = db.EndSession(spanCtx, r.sessionID)
+	r.sessionMutex.Unlock()
 	if err != nil {
 		return fmt.Errorf("Error ending session: %v", err)
 	}
@@ -160,12 +168,16 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 	if err != nil {
 		return fmt.Errorf("Error finding DB: %v", err)
 	}
+	r.sessionMutex.RLock()
 	tasks, dbErr := db.GetWork(spanCtx, r.sessionID, r.scanTask)
+	r.sessionMutex.RUnlock()
 	if dbErr != nil {
 		switch dbErr.Code() {
 		case SQLErrorSessionNotFound:
 			r.logger.Printf("Session expired. Getting new one")
+			r.sessionMutex.Lock()
 			r.sessionID, err = db.StartSession(spanCtx)
+			r.sessionMutex.Unlock()
 			if err != nil {
 				return fmt.Errorf("Error starting new session: %v", dbErr)
 			}
