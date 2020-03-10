@@ -40,13 +40,15 @@ func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick tim
 	if logger == nil {
 		logger = &noopLogger{}
 	}
+	var sg sync.WaitGroup
 	return &Runner{
-		dbFinder: dbFinder,
-		tracer:   tracer,
-		scanTask: scanTask,
-		loopTick: loopTick,
-		logger:   logger,
-		tasker:   tasker,
+		dbFinder:  dbFinder,
+		tracer:    tracer,
+		scanTask:  scanTask,
+		loopTick:  loopTick,
+		logger:    logger,
+		tasker:    tasker,
+		stopGroup: &sg,
 	}
 }
 
