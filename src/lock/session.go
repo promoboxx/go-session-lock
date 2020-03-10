@@ -51,6 +51,7 @@ func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick tim
 }
 
 // Run will start looping and processing tasks
+// dont call this more than once.
 func (r *Runner) Run() error {
 	db, err := r.dbFinder()
 	if err != nil {
