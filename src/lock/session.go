@@ -22,13 +22,13 @@ type Runner struct {
 	sessionMutex sync.RWMutex
 	sessionID    int64
 	dbFinder     DBFinder
-  client       metrics.Client
+	client       metrics.Client
 	tracer       Tracer
 	scanTask     ScanTask
 	loopTick     time.Duration
 	logger       Logger
 	tasker       Tasker
-  name         string
+	name         string
 }
 
 // NewRunner will create a new Runner to handle a type of task
@@ -54,13 +54,6 @@ func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick tim
 		logger:    logger,
 		tasker:    tasker,
 		name:      name,
-		stopGroup: &sg,
-		dbFinder:  dbFinder,
-		tracer:    tracer,
-		scanTask:  scanTask,
-		loopTick:  loopTick,
-		logger:    logger,
-		tasker:    tasker,
 		stopGroup: &sg,
 	}
 }
