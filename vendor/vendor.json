@@ -21,6 +21,12 @@
 			"revisionTime": "2020-01-24T16:56:24Z"
 		},
 		{
+			"checksumSHA1": "EMYPYmYapnWcmu5bQO1TeReRtwQ=",
+			"path": "github.com/opentracing/opentracing-go/ext",
+			"revision": "2876d2018785fe398ec001a16fd15121b8780660",
+			"revisionTime": "2020-01-24T16:56:24Z"
+		},
+		{
 			"checksumSHA1": "4QLjx120cph9sj7VnqOsbhRTCmc=",
 			"path": "github.com/opentracing/opentracing-go/log",
 			"revision": "2876d2018785fe398ec001a16fd15121b8780660",
@@ -43,6 +49,12 @@
 			"path": "golang.org/x/sys/unix",
 			"revision": "5c8b2ff67527cb88b770f693cebf3799036d8bc0",
 			"revisionTime": "2020-03-02T10:13:05Z"
+		},
+		{
+			"checksumSHA1": "g78CbKW1f6bDIYViyKWOJwVBSLA=",
+			"path": "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext",
+			"revision": "be6e397fb03ca27fb0ba94d840eed7f1f0fb7dd8",
+			"revisionTime": "2020-02-18T17:24:48Z"
 		}
 	],
 	"rootPath": "github.com/promoboxx/go-session-lock"

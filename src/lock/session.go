@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	otext "github.com/opentracing/opentracing-go/ext"
 	"github.com/promoboxx/go-metric-client/metrics"
 )
 
@@ -130,12 +131,14 @@ func (r *Runner) startSession(ctx context.Context, db Database) (sessionID int64
 	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner start session")
 	defer func() {
 		if err != nil {
-			span.SetTag("error", err)
+			otext.Error.Set(span, true)
+			span.SetTag("inner-error", err)
 		}
 		span.Finish()
 	}()
 
 	sessionID, err = db.StartSession(spanCtx)
+	span.SetTag("session_id", sessionID)
 	return sessionID, err
 }
 
@@ -143,7 +146,8 @@ func (r *Runner) endSession(ctx context.Context) (err error) {
 	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner end session")
 	defer func() {
 		if err != nil {
-			span.SetTag("error", err)
+			otext.Error.Set(span, true)
+			span.SetTag("inner-error", err)
 		}
 		span.Finish()
 	}()
