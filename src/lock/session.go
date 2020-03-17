@@ -39,7 +39,7 @@ type Runner struct {
 // looptick defines how often to check for tasks to complete
 // client is a go-metrics-client that will also start spans for us
 // logger is optional and will log errors if provided
-func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, tracer Tracer, logger Logger, name string, client metrics.Client) *Runner {
+func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, logger Logger, name string, client metrics.Client) *Runner {
 	if client == nil {
 		return nil
 	}
