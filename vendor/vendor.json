@@ -33,12 +33,6 @@
 			"revisionTime": "2020-01-24T16:56:24Z"
 		},
 		{
-			"checksumSHA1": "SpxkO4Lf4LK6Fgd8/UelctVdhfo=",
-			"path": "github.com/promoboxx/go-metric-client/metrics",
-			"revision": "7af5b1b6df388122045f5841cf860d3cf86c9fd7",
-			"revisionTime": "2020-03-09T16:33:23Z"
-		},
-		{
 			"checksumSHA1": "heMZsHY23VQhUPSBgVQu1lbRSbw=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "7ea96a3284ed9d25de5056804d60426cb75833c7",

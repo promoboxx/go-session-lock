@@ -7,9 +7,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	otext "github.com/opentracing/opentracing-go/ext"
-	"github.com/promoboxx/go-metric-client/metrics"
 )
 
 // Tasker can do the work associated with the tasks passed to it.
@@ -23,7 +20,6 @@ type Runner struct {
 	sessionMutex sync.RWMutex
 	sessionID    int64
 	dbFinder     DBFinder
-	client       metrics.Client
 	tracer       Tracer
 	scanTask     ScanTask
 	loopTick     time.Duration
@@ -39,9 +35,9 @@ type Runner struct {
 // looptick defines how often to check for tasks to complete
 // client is a go-metrics-client that will also start spans for us
 // logger is optional and will log errors if provided
-func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, client metrics.Client, logger Logger, name string) *Runner {
-	if client == nil {
-		return nil
+func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, tracer Tracer, logger Logger, name string) *Runner {
+	if tracer == nil {
+		tracer = newNoopTracer()
 	}
 	if logger == nil {
 		logger = &noopLogger{}
@@ -49,7 +45,7 @@ func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick tim
 	var sg sync.WaitGroup
 	return &Runner{
 		dbFinder:  dbFinder,
-		client:    client,
+		tracer:    tracer,
 		scanTask:  scanTask,
 		loopTick:  loopTick,
 		logger:    logger,
@@ -128,11 +124,10 @@ func (r *Runner) Run() error {
 }
 
 func (r *Runner) startSession(ctx context.Context, db Database) (sessionID int64, err error) {
-	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner start session")
+	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "runner start session")
 	defer func() {
 		if err != nil {
-			otext.Error.Set(span, true)
-			span.SetTag("inner-error", err)
+			span.SetError(err)
 		}
 		span.Finish()
 	}()
@@ -143,11 +138,10 @@ func (r *Runner) startSession(ctx context.Context, db Database) (sessionID int64
 }
 
 func (r *Runner) endSession(ctx context.Context) (err error) {
-	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner end session")
+	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "runner end session")
 	defer func() {
 		if err != nil {
-			otext.Error.Set(span, true)
-			span.SetTag("inner-error", err)
+			span.SetError(err)
 		}
 		span.Finish()
 	}()
@@ -167,15 +161,15 @@ func (r *Runner) endSession(ctx context.Context) (err error) {
 }
 
 func (r *Runner) doWork(ctx context.Context) (err error) {
-	span, spanCtx := r.client.StartSpanWithContext(ctx, "doing work")
+	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "doing work")
 	start := time.Now()
 	name := r.name
 	sessionID := strconv.FormatInt(r.sessionID, 10)
 	params := make(map[string]string)
-	r.client.BackgroundRate(sessionID, name, params, 1)
+	r.tracer.BackgroundRate(sessionID, name, params, 1)
 	defer func() {
 		if err != nil {
-			span.SetTag("error", err)
+			span.SetError(err)
 		}
 		span.Finish()
 	}()
@@ -224,15 +218,15 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 		return fmt.Errorf("Error finishing tasks: %v", dbErr)
 	}
 	end := time.Since(start)
-	r.client.BackgroundDuration(sessionID, name, params, end)
+	r.tracer.BackgroundDuration(sessionID, name, params, end)
 	return nil
 }
 
 // Does common error stuff
 func (r *Runner) handleError(start time.Time, sessionID, name, code, message string, params map[string]string) {
 	end := time.Since(start)
-	r.client.BackgroundDuration(sessionID, name, params, end)
-	r.client.BackgroundError(sessionID, name, params, code, message, 1)
+	r.tracer.BackgroundDuration(sessionID, name, params, end)
+	r.tracer.BackgroundError(sessionID, name, params, code, message, 1)
 }
 
 // Stop stops the runner from looping
