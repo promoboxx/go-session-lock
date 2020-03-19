@@ -4,8 +4,13 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"sync"
 	"time"
+
+	"github.com/promoboxx/go-metric-client/metrics"
+
+	otext "github.com/opentracing/opentracing-go/ext"
 )
 
 // Tasker can do the work associated with the tasks passed to it.
@@ -19,11 +24,12 @@ type Runner struct {
 	sessionMutex sync.RWMutex
 	sessionID    int64
 	dbFinder     DBFinder
-	tracer       Tracer
+	client       metrics.Client
 	scanTask     ScanTask
 	loopTick     time.Duration
 	logger       Logger
 	tasker       Tasker
+	name         string
 }
 
 // NewRunner will create a new Runner to handle a type of task
@@ -31,11 +37,11 @@ type Runner struct {
 // scanTask can read from a sql.row into a Task
 // tasker can complete Tasks
 // looptick defines how often to check for tasks to complete
-// tracer is optional and will log tracing metrics in an open tracing friendly way if provided
+// client is a go-metrics-client that will also start spans for us
 // logger is optional and will log errors if provided
-func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, tracer Tracer, logger Logger) *Runner {
-	if tracer == nil {
-		tracer = newNoopTracer()
+func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, logger Logger, name string, client metrics.Client) *Runner {
+	if client == nil {
+		return nil
 	}
 	if logger == nil {
 		logger = &noopLogger{}
@@ -43,11 +49,12 @@ func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick tim
 	var sg sync.WaitGroup
 	return &Runner{
 		dbFinder:  dbFinder,
-		tracer:    tracer,
+		client:    client,
 		scanTask:  scanTask,
 		loopTick:  loopTick,
 		logger:    logger,
 		tasker:    tasker,
+		name:      name,
 		stopGroup: &sg,
 	}
 }
@@ -121,23 +128,26 @@ func (r *Runner) Run() error {
 }
 
 func (r *Runner) startSession(ctx context.Context, db Database) (sessionID int64, err error) {
-	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "runner start session")
+	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner start session")
 	defer func() {
 		if err != nil {
-			span.SetError(err)
+			otext.Error.Set(span, true)
+			span.SetTag("inner-error", err)
 		}
 		span.Finish()
 	}()
 
 	sessionID, err = db.StartSession(spanCtx)
+	span.SetTag("session_id", sessionID)
 	return sessionID, err
 }
 
 func (r *Runner) endSession(ctx context.Context) (err error) {
-	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "runner end session")
+	span, spanCtx := r.client.StartSpanWithContext(ctx, "runner end session")
 	defer func() {
 		if err != nil {
-			span.SetError(err)
+			otext.Error.Set(span, true)
+			span.SetTag("inner-error", err)
 		}
 		span.Finish()
 	}()
@@ -157,10 +167,16 @@ func (r *Runner) endSession(ctx context.Context) (err error) {
 }
 
 func (r *Runner) doWork(ctx context.Context) (err error) {
-	span, spanCtx := r.tracer.StartSpanWithContext(ctx, "doing work")
+	span, spanCtx := r.client.StartSpanWithContext(ctx, "doing work")
+	start := time.Now()
+	name := r.name
+	sessionID := strconv.FormatInt(r.sessionID, 10)
+	params := make(map[string]string)
+	r.client.BackgroundRate(sessionID, name, params, 1)
 	defer func() {
 		if err != nil {
-			span.SetError(err)
+			otext.Error.Set(span, true)
+			span.SetTag("inner-error", err)
 		}
 		span.Finish()
 	}()
@@ -168,6 +184,7 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 	// get work and process
 	db, err := r.dbFinder()
 	if err != nil {
+		r.handleError(start, sessionID, name, "Failed to find DB", err.Error(), params)
 		return fmt.Errorf("Error finding DB: %v", err)
 	}
 	r.sessionMutex.RLock()
@@ -181,9 +198,11 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 			r.sessionID, err = db.StartSession(spanCtx)
 			r.sessionMutex.Unlock()
 			if err != nil {
+				r.handleError(start, sessionID, name, "Failed to start session", err.Error()+" with dbError: "+dbErr.Error(), params)
 				return fmt.Errorf("Error starting new session: %v", dbErr)
 			}
 		default:
+			r.handleError(start, sessionID, name, "Failed getting work from db", err.Error()+" with dbError: "+dbErr.Error(), params)
 			return fmt.Errorf("Error getting work from db: %v", dbErr)
 		}
 
@@ -191,6 +210,7 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 
 	completedTasks, err := r.tasker(spanCtx, tasks)
 	if err != nil {
+		r.handleError(start, sessionID, name, "Error running tasks", err.Error(), params)
 		return fmt.Errorf("Error running tasks: %v", err)
 	}
 
@@ -201,10 +221,19 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 
 	dbErr = db.FinishTasks(spanCtx, taskIDs)
 	if dbErr != nil {
+		r.handleError(start, sessionID, name, "Error finishing tasks", dbErr.Error(), params)
 		return fmt.Errorf("Error finishing tasks: %v", dbErr)
 	}
-
+	end := time.Since(start)
+	r.client.BackgroundDuration(sessionID, name, params, end)
 	return nil
+}
+
+// Does common error stuff
+func (r *Runner) handleError(start time.Time, sessionID, name, code, message string, params map[string]string) {
+	end := time.Since(start)
+	r.client.BackgroundDuration(sessionID, name, params, end)
+	r.client.BackgroundError(sessionID, name, params, code, message, 1)
 }
 
 // Stop stops the runner from looping

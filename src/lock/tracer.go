@@ -2,17 +2,13 @@ package lock
 
 import (
 	"context"
+
+	"github.com/opentracing/opentracing-go"
 )
 
 // Tracer can trace the flow of calls via child spans.  This is meant to play nice with open tracing
 type Tracer interface {
-	StartSpanWithContext(ctx context.Context, name string) (Span, context.Context)
-}
-
-// Span can hold an error and be finalized.  This is meant to play nice with open tracing
-type Span interface {
-	Finish()
-	SetError(err error)
+	StartSpanWithContext(ctx context.Context, name string) (opentracing.Span, context.Context)
 }
 
 // newNoopTracer exposes a noop tracer that does nothing but fulfill the Tracer interface
@@ -21,12 +17,8 @@ func newNoopTracer() Tracer {
 }
 
 type noopTracer struct{}
-type noopSpan struct{}
 
-func (noopTracer) StartSpanWithContext(ctx context.Context, name string) (Span, context.Context) {
-	return noopSpan{}, ctx
+func (noopTracer) StartSpanWithContext(ctx context.Context, name string) (opentracing.Span, context.Context) {
+	span := opentracing.SpanFromContext(ctx)
+	return span, opentracing.ContextWithSpan(ctx, span)
 }
-
-func (noopSpan) Finish() {}
-
-func (noopSpan) SetError(err error) {}

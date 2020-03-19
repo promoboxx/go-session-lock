@@ -1,0 +1,61 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "iMyNHgH1vMLsOF0i2Uu1K33uURU=",
+			"path": "github.com/DataDog/datadog-go/statsd",
+			"revision": "37407e5ac3ade4d754a2b4eb3f03ac5aefb72cda",
+			"revisionTime": "2020-03-05T11:08:26Z"
+		},
+		{
+			"checksumSHA1": "Aulh7C5SVOA4Jzt5eHNH6197Mbk=",
+			"path": "github.com/konsorten/go-windows-terminal-sequences",
+			"revision": "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e",
+			"revisionTime": "2019-02-26T22:47:05Z"
+		},
+		{
+			"checksumSHA1": "27/3lgVHFu5B0pLypgJcfMoz3e0=",
+			"path": "github.com/opentracing/opentracing-go",
+			"revision": "2876d2018785fe398ec001a16fd15121b8780660",
+			"revisionTime": "2020-01-24T16:56:24Z"
+		},
+		{
+			"checksumSHA1": "EMYPYmYapnWcmu5bQO1TeReRtwQ=",
+			"path": "github.com/opentracing/opentracing-go/ext",
+			"revision": "2876d2018785fe398ec001a16fd15121b8780660",
+			"revisionTime": "2020-01-24T16:56:24Z"
+		},
+		{
+			"checksumSHA1": "4QLjx120cph9sj7VnqOsbhRTCmc=",
+			"path": "github.com/opentracing/opentracing-go/log",
+			"revision": "2876d2018785fe398ec001a16fd15121b8780660",
+			"revisionTime": "2020-01-24T16:56:24Z"
+		},
+		{
+			"checksumSHA1": "SpxkO4Lf4LK6Fgd8/UelctVdhfo=",
+			"path": "github.com/promoboxx/go-metric-client/metrics",
+			"revision": "7af5b1b6df388122045f5841cf860d3cf86c9fd7",
+			"revisionTime": "2020-03-09T16:33:23Z"
+		},
+		{
+			"checksumSHA1": "heMZsHY23VQhUPSBgVQu1lbRSbw=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "7ea96a3284ed9d25de5056804d60426cb75833c7",
+			"revisionTime": "2020-03-06T10:24:46Z"
+		},
+		{
+			"checksumSHA1": "WMdEuWDsHDpqcnYBf72fV2B+SDM=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "5c8b2ff67527cb88b770f693cebf3799036d8bc0",
+			"revisionTime": "2020-03-02T10:13:05Z"
+		},
+		{
+			"checksumSHA1": "g78CbKW1f6bDIYViyKWOJwVBSLA=",
+			"path": "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext",
+			"revision": "be6e397fb03ca27fb0ba94d840eed7f1f0fb7dd8",
+			"revisionTime": "2020-02-18T17:24:48Z"
+		}
+	],
+	"rootPath": "github.com/promoboxx/go-session-lock"
+}
