@@ -138,6 +138,6 @@ func (a asyncDatadogClient) InternalCustom(originatingService, destinationServic
 
 func (a asyncDatadogClient) StartSpanWithContext(ctx context.Context, name string) (opentracing.Span, context.Context) {
 
-	span := opentracing.SpanFromContext(ctx)
+	span, ctx := opentracing.StartSpanFromContext(ctx, name)
 	return span, opentracing.ContextWithSpan(ctx, span)
 }
