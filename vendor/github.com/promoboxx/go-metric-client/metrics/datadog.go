@@ -123,6 +123,6 @@ func (dmc *datadogMetricsClient) InternalCustom(originatingService, destinationS
 // This metric is used to keep track of business process counters in internal communications.
 func (dmc *datadogMetricsClient) StartSpanWithContext(ctx context.Context, name string) (opentracing.Span, context.Context) {
 
-	span := opentracing.SpanFromContext(ctx)
+	span, ctx := opentracing.StartSpanFromContext(ctx, name)
 	return span, opentracing.ContextWithSpan(ctx, span)
 }
