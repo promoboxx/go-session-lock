@@ -33,10 +33,10 @@
 			"revisionTime": "2020-01-24T16:56:24Z"
 		},
 		{
-			"checksumSHA1": "JouVFqQAT+U+bubwtk94HH5QjqI=",
+			"checksumSHA1": "Sqrf/GEVZB5UvhMuWSeusD8Akko=",
 			"path": "github.com/promoboxx/go-metric-client/metrics",
-			"revision": "111a19911776ee682378a6ac1618ff9d68a414d9",
-			"revisionTime": "2020-03-20T21:08:40Z"
+			"revision": "357449ef70f676737d088fc0ec01dd35ae3421ce",
+			"revisionTime": "2020-03-24T13:42:28Z"
 		},
 		{
 			"checksumSHA1": "heMZsHY23VQhUPSBgVQu1lbRSbw=",
