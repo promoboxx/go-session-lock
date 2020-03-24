@@ -31,7 +31,7 @@ func NewAsyncDatadogClient(address string, options statsd.Option, service string
 // This metric is used to count how often background jobs run.
 func (a asyncDatadogClient) BackgroundRate(sessionID, jobName string, params map[string]string, value int64) error {
 	go func() {
-		err := a.BackgroundRate(sessionID, jobName, params, value)
+		err := a.dmc.BackgroundRate(sessionID, jobName, params, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -43,7 +43,7 @@ func (a asyncDatadogClient) BackgroundRate(sessionID, jobName string, params map
 // This metric is used to count how often background jobs error.
 func (a asyncDatadogClient) BackgroundError(sessionID, jobName string, params map[string]string, code, message string, value int64) error {
 	go func() {
-		err := a.BackgroundError(sessionID, jobName, params, code, message, value)
+		err := a.dmc.BackgroundError(sessionID, jobName, params, code, message, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -55,7 +55,7 @@ func (a asyncDatadogClient) BackgroundError(sessionID, jobName string, params ma
 // This gauge metric is used to keep track of the runtime of various jobs.
 func (a asyncDatadogClient) BackgroundDuration(sessionID, jobName string, params map[string]string, value time.Duration) error {
 	go func() {
-		err := a.BackgroundDuration(sessionID, jobName, params, value)
+		err := a.dmc.BackgroundDuration(sessionID, jobName, params, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -67,7 +67,7 @@ func (a asyncDatadogClient) BackgroundDuration(sessionID, jobName string, params
 // This metric is used to keep track of business process counters in background jobs (sessions).
 func (a asyncDatadogClient) BackgroundCustom(sessionID string, jobName string, customName string, params, other map[string]string, value int64) error {
 	go func() {
-		err := a.BackgroundCustom(sessionID, jobName, customName, params, other, value)
+		err := a.dmc.BackgroundCustom(sessionID, jobName, customName, params, other, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -79,7 +79,7 @@ func (a asyncDatadogClient) BackgroundCustom(sessionID string, jobName string, c
 // This metric is used to count how often we communicate with an external partner we are integrated with.
 func (a asyncDatadogClient) ExternalRate(direction, externalService, path string, value int64) error {
 	go func() {
-		err := a.ExternalRate(direction, externalService, path, value)
+		err := a.dmc.ExternalRate(direction, externalService, path, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -91,7 +91,7 @@ func (a asyncDatadogClient) ExternalRate(direction, externalService, path string
 // This metric is used to count how often partner communications error.
 func (a asyncDatadogClient) ExternalError(direction, externalService, path, code, message string, value int64) error {
 	go func() {
-		err := a.ExternalError(direction, externalService, path, code, message, value)
+		err := a.dmc.ExternalError(direction, externalService, path, code, message, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -103,7 +103,7 @@ func (a asyncDatadogClient) ExternalError(direction, externalService, path, code
 // This gauge metric is used to keep track of the runtime of various partner communications.
 func (a asyncDatadogClient) ExternalDuration(direction, externalService, path string, value time.Duration) error {
 	go func() {
-		err := a.ExternalDuration(direction, externalService, path, value)
+		err := a.dmc.ExternalDuration(direction, externalService, path, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -115,7 +115,7 @@ func (a asyncDatadogClient) ExternalDuration(direction, externalService, path st
 // This metric is used to keep track of business process counters in partner communications.
 func (a asyncDatadogClient) ExternalCustom(direction, externalService, path, customName string, other map[string]string, value int64) error {
 	go func() {
-		err := a.ExternalCustom(direction, externalService, path, customName, other, value)
+		err := a.dmc.ExternalCustom(direction, externalService, path, customName, other, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
@@ -127,7 +127,7 @@ func (a asyncDatadogClient) ExternalCustom(direction, externalService, path, cus
 // This metric is used to keep track of business process counters in internal communications.
 func (a asyncDatadogClient) InternalCustom(originatingService, destinationService, path, customName string, other map[string]string, value int64) error {
 	go func() {
-		err := a.InternalCustom(originatingService, destinationService, path, customName, other, value)
+		err := a.dmc.InternalCustom(originatingService, destinationService, path, customName, other, value)
 
 		if err != nil {
 			a.logger.Errorf("error sending metrics data: %s", err)
