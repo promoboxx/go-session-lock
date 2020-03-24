@@ -86,7 +86,7 @@ func (r *Runner) Run() error {
 		for {
 			select {
 			case <-r.stop: // if Stop() was called, exit
-				err := r.endSession(ctx)
+				err := r.endSession(context.Background())
 				if err != nil {
 					r.logger.Printf("Error ending session: %v", err)
 				}
@@ -98,7 +98,7 @@ func (r *Runner) Run() error {
 			case <-tick:
 				// use wait group to block while doing work.
 				r.stopGroup.Add(1)
-				err := r.doWork(ctx)
+				err := r.doWork(context.Background())
 				if err != nil {
 					r.logger.Printf("Error doing work: %v", err)
 				}
@@ -116,7 +116,7 @@ func (r *Runner) Run() error {
 			select {
 			case <-tick:
 				r.sessionMutex.RLock()
-				err := db.BumpSession(ctx, r.sessionID)
+				err := db.BumpSession(context.Background(), r.sessionID)
 				r.sessionMutex.RUnlock()
 				if err != nil {
 					r.logger.Printf("Error bumping session: %v", err)
