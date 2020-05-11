@@ -9,6 +9,42 @@
 			"revisionTime": "2020-03-05T11:08:26Z"
 		},
 		{
+			"checksumSHA1": "P+YWoacSinuPgrm9YhNLi83f75M=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "dc14462fd58732591c7fa58cc8496d6824316a82",
+			"revisionTime": "2020-01-07T01:32:13Z"
+		},
+		{
+			"checksumSHA1": "NCCZZOQeCoA8XTTw0i+rALZfbsk=",
+			"path": "github.com/divideandconquer/go-consul-client/src/config",
+			"revision": "582bc8f36c6dc7a3950b053bf971201214a41e25",
+			"revisionTime": "2019-01-29T22:45:03Z"
+		},
+		{
+			"checksumSHA1": "sMvq+9MMLxs/UUdbScCycbg2S9U=",
+			"path": "github.com/golang/groupcache/singleflight",
+			"revision": "8c9f03a8e57eb486e42badaed3fb287da51807ba",
+			"revisionTime": "2020-01-21T04:51:36Z"
+		},
+		{
+			"checksumSHA1": "sTvodH5izJiwE4++Lzh4uaMKjp4=",
+			"path": "github.com/google/uuid",
+			"revision": "bd451584982ecf4ca5b1e5938cf168e17e30d837",
+			"revisionTime": "2020-03-31T01:53:17Z"
+		},
+		{
+			"checksumSHA1": "PMC9b35zxCEowZ1RbnjR0+43uNY=",
+			"path": "github.com/husobee/vestigo",
+			"revision": "420bd718f4d740fc2d0de74dfb18ce2a5ce5e5af",
+			"revisionTime": "2019-09-24T13:01:02Z"
+		},
+		{
+			"checksumSHA1": "asbFENDIRDuAIZNbYGdax09ioTI=",
+			"path": "github.com/justinas/alice",
+			"revision": "698d694619453f429d388422116af97d11f37f41",
+			"revisionTime": "2019-11-05T13:55:52Z"
+		},
+		{
 			"checksumSHA1": "Aulh7C5SVOA4Jzt5eHNH6197Mbk=",
 			"path": "github.com/konsorten/go-windows-terminal-sequences",
 			"revision": "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e",
@@ -33,10 +69,94 @@
 			"revisionTime": "2020-01-24T16:56:24Z"
 		},
 		{
+			"checksumSHA1": "uf29R4zUiNF3mSoKNaKyntRJ/VQ=",
+			"path": "github.com/patrickmn/go-cache",
+			"revision": "46f407853014144407b6c2ec7ccc76bf67958d93",
+			"revisionTime": "2019-10-04T19:21:08Z"
+		},
+		{
+			"checksumSHA1": "1nAYGvzPp3lmlyAHU3My7UdWbgg=",
+			"path": "github.com/pborman/uuid",
+			"revision": "5b6091a6a160ee5ce12917b21ab96acec2a4fdc0",
+			"revisionTime": "2019-10-24T13:36:33Z"
+		},
+		{
+			"checksumSHA1": "l/IU0rzUf0iQ0NW8TJQ4dnNKY4E=",
+			"path": "github.com/promoboxx/go-auth/src/auth",
+			"revision": "b00c69d023bd017ee4ca1fd27bc4b0c580ea9e00",
+			"revisionTime": "2019-08-30T15:20:00Z"
+		},
+		{
+			"checksumSHA1": "XE3sIOU59xmK0E02BGKEbl/axCE=",
+			"path": "github.com/promoboxx/go-cache/src/cache",
+			"revision": "7d4bd5b61d193126b8319a0493431741335b36eb",
+			"revisionTime": "2018-12-13T20:26:04Z"
+		},
+		{
+			"checksumSHA1": "HulqNltNGM31HcVmuM9DXbwtcS4=",
+			"path": "github.com/promoboxx/go-cache/src/storage/memory",
+			"revision": "7d4bd5b61d193126b8319a0493431741335b36eb",
+			"revisionTime": "2018-12-13T20:26:04Z"
+		},
+		{
+			"checksumSHA1": "PmYPP/YtScCRJ4AnXtrHNmvyECc=",
+			"path": "github.com/promoboxx/go-client/client",
+			"revision": "e4a08d0c3ee72e8c38a05091735ae5e157d08ed8",
+			"revisionTime": "2019-12-18T16:36:18Z"
+		},
+		{
+			"checksumSHA1": "YsTaRLifQakyCJVd/wSK7rS0KC0=",
+			"path": "github.com/promoboxx/go-cloudinary-client/cloudinary",
+			"revision": "321795802fe5167794d80df5ac63670565c67281",
+			"revisionTime": "2020-01-05T21:13:00Z"
+		},
+		{
+			"checksumSHA1": "j34X0UmEsFg8xOGrWhL9r0g1zLA=",
+			"path": "github.com/promoboxx/go-discovery/src/discovery",
+			"revision": "c169e2d45a22b2f05805e0129bf55ee9b40030a8",
+			"revisionTime": "2018-12-14T18:58:44Z"
+		},
+		{
+			"checksumSHA1": "ztzFoEnnsRQCdM/QmIU1JjAjZes=",
+			"path": "github.com/promoboxx/go-glitch/glitch",
+			"revision": "c6a7dead40f7ac7281152b5e5ab70d51aa66e9de",
+			"revisionTime": "2019-11-01T16:23:40Z"
+		},
+		{
 			"checksumSHA1": "NZEe7Trdhr9Z6I3PpesQD8AWkGw=",
 			"path": "github.com/promoboxx/go-metric-client/metrics",
 			"revision": "26c1cc6461fe2b6a8a68c62c8655e3a694aed89b",
 			"revisionTime": "2020-03-24T20:08:24Z"
+		},
+		{
+			"checksumSHA1": "0I7G52fpwjmgGfxtQShmZIpu9Vo=",
+			"path": "github.com/promoboxx/go-pbxx2-client/pbxx2",
+			"revision": "0b5f8279017c6419946c045fe7f77791b5f861de",
+			"revisionTime": "2020-05-08T00:57:52Z"
+		},
+		{
+			"checksumSHA1": "EYRfqbpH9nq9mcZR8Wkh3LMPaZw=",
+			"path": "github.com/promoboxx/go-service/alice/middleware",
+			"revision": "e3071bae54f1b18db4e10433f2b237f1f4d1d242",
+			"revisionTime": "2020-03-04T17:16:15Z"
+		},
+		{
+			"checksumSHA1": "5waRowK8chaajMWfuBeFLNkE+o4=",
+			"path": "github.com/promoboxx/go-service/alice/middleware/contextkey",
+			"revision": "e3071bae54f1b18db4e10433f2b237f1f4d1d242",
+			"revisionTime": "2020-03-04T17:16:15Z"
+		},
+		{
+			"checksumSHA1": "vy9tQYmXpL7T7SPh4hSlKnwrukY=",
+			"path": "github.com/promoboxx/go-service/alice/middleware/lrw",
+			"revision": "e3071bae54f1b18db4e10433f2b237f1f4d1d242",
+			"revisionTime": "2020-03-04T17:16:15Z"
+		},
+		{
+			"checksumSHA1": "P+IBUKDke8nKEhNWXR7S7yRdDWE=",
+			"path": "github.com/promoboxx/go-service/service",
+			"revision": "e3071bae54f1b18db4e10433f2b237f1f4d1d242",
+			"revisionTime": "2020-03-04T17:16:15Z"
 		},
 		{
 			"checksumSHA1": "heMZsHY23VQhUPSBgVQu1lbRSbw=",
