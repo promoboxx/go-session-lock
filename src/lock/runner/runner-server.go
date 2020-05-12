@@ -1,6 +1,7 @@
-package lock
+package runner
 
 import (
+	"github.com/promoboxx/go-session-lock/src/lock"
 	"sync"
 
 	"github.com/divideandconquer/go-consul-client/src/config"
@@ -14,7 +15,7 @@ type RunnerServer interface {
 }
 
 type runner struct {
-	runner *Runner
+	runner *lock.Runner
 	state  string
 }
 
@@ -39,15 +40,13 @@ type runnerServer struct {
 	serviceName string
 	conf        config.Loader
 	finder      discovery.Finder
-	tracer      Tracer
+	tracer      lock.Tracer
 	runners     []*runner
-	// client manager field here?
 }
 
 // NewRunnerServer returns a RunnerServer
-func NewRunnerServer(env, serviceName string, conf config.Loader, finder discovery.Finder, tracer Tracer) RunnerServer {
-	ret := &runnerServer{environment: env, serviceName: serviceName, conf: conf, finder: finder, tracer: tracer}
-	ret.init()
+func NewRunnerServer(env, serviceName string, conf config.Loader, finder discovery.Finder, tracer lock.Tracer, runners []*runner) RunnerServer {
+	ret := &runnerServer{environment: env, serviceName: serviceName, conf: conf, finder: finder, tracer: tracer, runners: runners}
 	return ret
 }
 
