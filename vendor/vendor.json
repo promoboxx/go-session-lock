@@ -9,6 +9,18 @@
 			"revisionTime": "2020-03-05T11:08:26Z"
 		},
 		{
+			"checksumSHA1": "NCCZZOQeCoA8XTTw0i+rALZfbsk=",
+			"path": "github.com/divideandconquer/go-consul-client/src/config",
+			"revision": "582bc8f36c6dc7a3950b053bf971201214a41e25",
+			"revisionTime": "2019-01-29T22:45:03Z"
+		},
+		{
+			"checksumSHA1": "sMvq+9MMLxs/UUdbScCycbg2S9U=",
+			"path": "github.com/golang/groupcache/singleflight",
+			"revision": "8c9f03a8e57eb486e42badaed3fb287da51807ba",
+			"revisionTime": "2020-01-21T04:51:36Z"
+		},
+		{
 			"checksumSHA1": "Aulh7C5SVOA4Jzt5eHNH6197Mbk=",
 			"path": "github.com/konsorten/go-windows-terminal-sequences",
 			"revision": "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e",
@@ -33,6 +45,36 @@
 			"revisionTime": "2020-01-24T16:56:24Z"
 		},
 		{
+			"checksumSHA1": "uf29R4zUiNF3mSoKNaKyntRJ/VQ=",
+			"path": "github.com/patrickmn/go-cache",
+			"revision": "46f407853014144407b6c2ec7ccc76bf67958d93",
+			"revisionTime": "2019-10-04T19:21:08Z"
+		},
+		{
+			"checksumSHA1": "XE3sIOU59xmK0E02BGKEbl/axCE=",
+			"path": "github.com/promoboxx/go-cache/src/cache",
+			"revision": "7d4bd5b61d193126b8319a0493431741335b36eb",
+			"revisionTime": "2018-12-13T20:26:04Z"
+		},
+		{
+			"checksumSHA1": "HulqNltNGM31HcVmuM9DXbwtcS4=",
+			"path": "github.com/promoboxx/go-cache/src/storage/memory",
+			"revision": "7d4bd5b61d193126b8319a0493431741335b36eb",
+			"revisionTime": "2018-12-13T20:26:04Z"
+		},
+		{
+			"checksumSHA1": "j34X0UmEsFg8xOGrWhL9r0g1zLA=",
+			"path": "github.com/promoboxx/go-discovery/src/discovery",
+			"revision": "c169e2d45a22b2f05805e0129bf55ee9b40030a8",
+			"revisionTime": "2018-12-14T18:58:44Z"
+		},
+		{
+			"checksumSHA1": "ztzFoEnnsRQCdM/QmIU1JjAjZes=",
+			"path": "github.com/promoboxx/go-glitch/glitch",
+			"revision": "c6a7dead40f7ac7281152b5e5ab70d51aa66e9de",
+			"revisionTime": "2019-11-01T16:23:40Z"
+		},
+		{
 			"checksumSHA1": "NZEe7Trdhr9Z6I3PpesQD8AWkGw=",
 			"path": "github.com/promoboxx/go-metric-client/metrics",
 			"revision": "26c1cc6461fe2b6a8a68c62c8655e3a694aed89b",
@@ -49,12 +91,6 @@
 			"path": "golang.org/x/sys/unix",
 			"revision": "5c8b2ff67527cb88b770f693cebf3799036d8bc0",
 			"revisionTime": "2020-03-02T10:13:05Z"
-		},
-		{
-			"checksumSHA1": "g78CbKW1f6bDIYViyKWOJwVBSLA=",
-			"path": "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext",
-			"revision": "be6e397fb03ca27fb0ba94d840eed7f1f0fb7dd8",
-			"revisionTime": "2020-02-18T17:24:48Z"
 		}
 	],
 	"rootPath": "github.com/promoboxx/go-session-lock"
