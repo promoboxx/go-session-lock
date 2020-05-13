@@ -1,4 +1,4 @@
-package runner
+package server
 
 import (
 	"github.com/promoboxx/go-session-lock/src/lock"
