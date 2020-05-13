@@ -14,25 +14,9 @@ type RunnerServer interface {
 	Stop() *sync.WaitGroup
 }
 
-type runner struct {
-	runner *lock.Runner
-	state  string
-}
-
-func (r *runner) run() error {
-	err := r.runner.Run()
-	if err != nil {
-		return err
-	}
-	r.state = "running"
-	return nil
-}
-
-func (r *runner) stop() *sync.WaitGroup {
-	if r.state == "running" {
-		return r.runner.Stop()
-	}
-	return nil
+type Runner interface {
+	Run() error
+	Stop() *sync.WaitGroup
 }
 
 type runnerServer struct {
@@ -41,18 +25,18 @@ type runnerServer struct {
 	conf        config.Loader
 	finder      discovery.Finder
 	tracer      lock.Tracer
-	runners     []*runner
+	runners     []Runner
 }
 
 // NewRunnerServer returns a RunnerServer
-func NewRunnerServer(env, serviceName string, conf config.Loader, finder discovery.Finder, tracer lock.Tracer, runners []*runner) RunnerServer {
+func NewRunnerServer(env, serviceName string, conf config.Loader, finder discovery.Finder, tracer lock.Tracer, runners []Runner) RunnerServer {
 	ret := &runnerServer{environment: env, serviceName: serviceName, conf: conf, finder: finder, tracer: tracer, runners: runners}
 	return ret
 }
 
 func (s *runnerServer) Run() error {
 	for _, runner := range s.runners {
-		err := runner.run()
+		err := runner.Run()
 		if err != nil {
 			s.Stop()
 			return err
@@ -65,7 +49,7 @@ func (s *runnerServer) Stop() *sync.WaitGroup {
 	var ret sync.WaitGroup
 	for _, runner := range s.runners {
 		ret.Add(1)
-		wg := runner.stop()
+		wg := runner.Stop()
 		go func() {
 			wg.Wait()
 			ret.Done()
