@@ -96,13 +96,22 @@ func (r *Runner) Run() error {
 			}
 			select {
 			case <-tick:
-				// use wait group to block while doing work.
-				r.stopGroup.Add(1)
-				err := r.doWork(context.Background())
-				if err != nil {
-					r.logger.Printf("Error doing work: %v", err)
+				// doWork until no tasks remain
+				for {
+					// use wait group to block while doing work.
+					r.stopGroup.Add(1)
+					tasks, err := r.doWork(context.Background())
+					if err != nil {
+						r.logger.Printf("Error doing work: %v", err)
+						r.stopGroup.Done()
+						break
+					}
+					if tasks == nil || len(tasks) == 0 {
+						r.stopGroup.Done()
+						break
+					}
+					r.stopGroup.Done()
 				}
-				r.stopGroup.Done()
 			}
 		}
 	}()
@@ -166,7 +175,7 @@ func (r *Runner) endSession(ctx context.Context) (err error) {
 	return
 }
 
-func (r *Runner) doWork(ctx context.Context) (err error) {
+func (r *Runner) doWork(ctx context.Context) (tasks []Task, err error) {
 	span, spanCtx := r.client.StartSpanWithContext(ctx, "doing work")
 	start := time.Now()
 	name := r.name
@@ -185,7 +194,7 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 	db, err := r.dbFinder()
 	if err != nil {
 		r.handleError(start, sessionID, name, "Failed to find DB", err.Error(), params)
-		return fmt.Errorf("Error finding DB: %v", err)
+		return tasks, fmt.Errorf("Error finding DB: %v", err)
 	}
 	r.sessionMutex.RLock()
 	tasks, dbErr := db.GetWork(spanCtx, r.sessionID, r.scanTask)
@@ -199,11 +208,11 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 			r.sessionMutex.Unlock()
 			if err != nil {
 				r.handleError(start, sessionID, name, "Failed to start session", err.Error()+" with dbError: "+dbErr.Error(), params)
-				return fmt.Errorf("Error starting new session: %v", dbErr)
+				return tasks, fmt.Errorf("Error starting new session: %v", dbErr)
 			}
 		default:
 			r.handleError(start, sessionID, name, "Failed getting work from db", err.Error()+" with dbError: "+dbErr.Error(), params)
-			return fmt.Errorf("Error getting work from db: %v", dbErr)
+			return tasks, fmt.Errorf("Error getting work from db: %v", dbErr)
 		}
 
 	}
@@ -211,7 +220,7 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 	completedTasks, err := r.tasker(spanCtx, tasks)
 	if err != nil {
 		r.handleError(start, sessionID, name, "Error running tasks", err.Error(), params)
-		return fmt.Errorf("Error running tasks: %v", err)
+		return tasks, fmt.Errorf("Error running tasks: %v", err)
 	}
 
 	taskIDs := make([]string, len(completedTasks))
@@ -222,11 +231,11 @@ func (r *Runner) doWork(ctx context.Context) (err error) {
 	dbErr = db.FinishTasks(spanCtx, taskIDs)
 	if dbErr != nil {
 		r.handleError(start, sessionID, name, "Error finishing tasks", dbErr.Error(), params)
-		return fmt.Errorf("Error finishing tasks: %v", dbErr)
+		return tasks, fmt.Errorf("Error finishing tasks: %v", dbErr)
 	}
 	end := time.Since(start)
 	r.client.BackgroundDuration(sessionID, name, params, end)
-	return nil
+	return tasks, nil
 }
 
 // Does common error stuff
