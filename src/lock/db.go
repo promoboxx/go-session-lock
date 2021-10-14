@@ -18,7 +18,7 @@ type Database interface {
 	StartSession(ctx context.Context) (int64, glitch.DataError)
 	EndSession(ctx context.Context, sessionID int64) glitch.DataError
 	BumpSession(ctx context.Context, sessionID int64) glitch.DataError
-	GetWork(ctx context.Context, sessionID int64, scanTask ScanTask) ([]Task, glitch.DataError)
+	GetWork(ctx context.Context, sessionID int64, tasksPerSession int64, scanTask ScanTask) ([]Task, glitch.DataError)
 	FinishTasks(ctx context.Context, taskIDs []string) glitch.DataError
 }
 

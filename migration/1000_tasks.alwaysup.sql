@@ -3,6 +3,7 @@
 ---
 
 DROP FUNCTION IF EXISTS get_work(in_session_id session.id%TYPE);
+DROP FUNCTION IF EXISTS get_work(in_session_id session.id%TYPE, in_tasks_per_session_count INTEGER);
 DROP FUNCTION IF EXISTS get_tasks_for_session(in_session_id user_entry.session_id%TYPE);
 DROP TYPE IF EXISTS session_task;
 CREATE TYPE session_task AS (
@@ -24,8 +25,8 @@ DECLARE
 BEGIN
     -- TODO - Fill in this function so that it returns the total count for current tasks
 
-    -- SELECT count(*) 
-    -- FROM task 
+    -- SELECT count(*)
+    -- FROM task
     -- INTO v_ret;
 
     RETURN v_ret;
@@ -39,10 +40,10 @@ AS $$
 DECLARE
     v_ret INTEGER;
 BEGIN
-    -- TODO - Fill in this function so that it returns the count for current tasks for the session passed in 
-    
-    -- SELECT count(*) 
-    -- FROM task 
+    -- TODO - Fill in this function so that it returns the count for current tasks for the session passed in
+
+    -- SELECT count(*)
+    -- FROM task
     -- WHERE session_id = in_session_id
     -- INTO v_ret;
 
@@ -63,7 +64,7 @@ BEGIN
     -- UPDATE task t
     -- SET session_id = in_session_id
     -- WHERE t.id = ANY(
-    --     SELECT tt.id 
+    --     SELECT tt.id
     --     FROM task tt
     --     LEFT OUTER JOIN session s on tt.session_id = s.id
     --     WHERE (tt.session_id IS NULL OR s.expires < v_now) -- there is no session or there is an expired session working this task
@@ -81,7 +82,7 @@ BEGIN
 
     RETURN QUERY(
         -- SELECT user_id, stuff
-        -- FROM task 
+        -- FROM task
         -- WHERE session_id = in_session_id
     );
 END;

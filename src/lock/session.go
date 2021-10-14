@@ -19,17 +19,18 @@ type Tasker func(ctx context.Context, tasks []Task) ([]Task, error)
 
 // Runner will loop and run tasks assigned to it
 type Runner struct {
-	stop         chan bool
-	stopGroup    *sync.WaitGroup
-	sessionMutex sync.RWMutex
-	sessionID    int64
-	dbFinder     DBFinder
-	client       metrics.Client
-	scanTask     ScanTask
-	loopTick     time.Duration
-	logger       Logger
-	tasker       Tasker
-	name         string
+	stop            chan bool
+	stopGroup       *sync.WaitGroup
+	sessionMutex    sync.RWMutex
+	sessionID       int64
+	tasksPerSession int64
+	dbFinder        DBFinder
+	client          metrics.Client
+	scanTask        ScanTask
+	loopTick        time.Duration
+	logger          Logger
+	tasker          Tasker
+	name            string
 }
 
 // NewRunner will create a new Runner to handle a type of task
@@ -39,7 +40,7 @@ type Runner struct {
 // looptick defines how often to check for tasks to complete
 // client is a go-metrics-client that will also start spans for us
 // logger is optional and will log errors if provided
-func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, logger Logger, name string, client metrics.Client) *Runner {
+func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick time.Duration, tasksPerSession int64, logger Logger, name string, client metrics.Client) *Runner {
 	if client == nil {
 		return nil
 	}
@@ -48,14 +49,15 @@ func NewRunner(dbFinder DBFinder, scanTask ScanTask, tasker Tasker, loopTick tim
 	}
 	var sg sync.WaitGroup
 	return &Runner{
-		dbFinder:  dbFinder,
-		client:    client,
-		scanTask:  scanTask,
-		loopTick:  loopTick,
-		logger:    logger,
-		tasker:    tasker,
-		name:      name,
-		stopGroup: &sg,
+		dbFinder:        dbFinder,
+		client:          client,
+		scanTask:        scanTask,
+		loopTick:        loopTick,
+		tasksPerSession: tasksPerSession,
+		logger:          logger,
+		tasker:          tasker,
+		name:            name,
+		stopGroup:       &sg,
 	}
 }
 
@@ -197,7 +199,7 @@ func (r *Runner) doWork(ctx context.Context) (tasks []Task, err error) {
 		return tasks, fmt.Errorf("Error finding DB: %v", err)
 	}
 	r.sessionMutex.RLock()
-	tasks, dbErr := db.GetWork(spanCtx, r.sessionID, r.scanTask)
+	tasks, dbErr := db.GetWork(spanCtx, r.sessionID, r.tasksPerSession, r.scanTask)
 	r.sessionMutex.RUnlock()
 	if dbErr != nil {
 		switch dbErr.Code() {

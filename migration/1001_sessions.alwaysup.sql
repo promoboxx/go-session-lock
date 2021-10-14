@@ -67,7 +67,7 @@ $$ LANGUAGE plpgsql;
 -- This will balance the tasks evenly across the active sessions and
 -- return work for this session to do.
 ---
-CREATE OR REPLACE FUNCTION get_work(in_session_id session.id%TYPE)
+CREATE OR REPLACE FUNCTION get_work(in_session_id session.id%TYPE, in_tasks_per_session_count INTEGER)
 RETURNS SETOF session_task
 AS $$
 DECLARE
@@ -90,7 +90,7 @@ BEGIN
     SELECT get_task_count FROM get_task_count() INTO v_task_count;
     v_available_tasks_per_session_count := CEIL(v_task_count::NUMERIC / v_sessions::NUMERIC)::INTEGER;
     -- limit tasks per sessions
-    v_ideal_count := LEAST(v_available_tasks_per_session_count, 10);
+    v_ideal_count := LEAST(v_available_tasks_per_session_count, in_tasks_per_session_count);
     -- count how many active tasks this session has
     SELECT get_task_count_for_session FROM get_task_count_for_session(in_session_id) INTO v_session_count;
 
