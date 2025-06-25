@@ -213,7 +213,7 @@ func (r *Runner) doWork(ctx context.Context) (tasks []Task, err error) {
 				return tasks, fmt.Errorf("Error starting new session: %v", dbErr)
 			}
 		default:
-			r.handleError(start, sessionID, name, "Failed getting work from db", err.Error()+" with dbError: "+dbErr.Error(), params)
+			r.handleError(start, sessionID, name, "Failed getting work from db", "with dbError: "+dbErr.Error(), params)
 			return tasks, fmt.Errorf("Error getting work from db: %v", dbErr)
 		}
 
